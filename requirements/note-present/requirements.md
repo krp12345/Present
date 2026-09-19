@@ -24,9 +24,25 @@ Then the record is saved with all chosen tags
 
 Given a tag already exists
 And the log-the-moment screen is shown
-When that tag is picked
+When that tag is picked from the searchable tag picker
 And save is requested
 Then the record is saved with that tag
+
+## Tags are picked with a searchable multi-select
+
+Given the log-the-moment screen is shown
+When the tag picker is used
+Then more than one existing tag can be chosen
+And the chosen tags are shown as removable chips
+
+## New tag can be added from the tag picker search
+
+Given the log-the-moment screen is shown
+When a tag name is searched that does not already exist
+And that name is added from the picker
+And save is requested
+Then the record is saved with that tag
+And the tag is available later on the pick list
 
 ## Time defaults to now
 

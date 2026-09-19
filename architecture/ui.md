@@ -5,7 +5,7 @@ One web app. No native phone client in this slice. Away from home, only the pers
 ## Screens
 
 1. **Key entry** — only this on launch. No other chrome about the rest of the product.
-2. **Log the moment** — default screen after unlock. Description, tags (pick existing), time (now unless a past time is set), save. After save, show that record and allow edit. History is not embedded here. There is no dedicated mood control.
+2. **Log the moment** — default screen after unlock. Description, tags (searchable multi-select with add-from-search), time (now unless a past time is set), save. After save, show that record and allow edit. History is not embedded here. There is no dedicated mood control.
 3. **Side menu** — opened from a small control; hidden on the left until opened. Entries: history, tag management. Log the moment remains the home surface.
 4. **History** — list of records that are not soft-deleted; open; edit description, tags, and time; filter by tag and by time range; delete with confirmation.
 5. **Tag management** — add, rename, remove with confirmation.

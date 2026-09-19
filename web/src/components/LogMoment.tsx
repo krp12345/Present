@@ -1,5 +1,6 @@
 import { Show, createEffect, createSignal, onMount } from "solid-js";
 import { api, type RecordItem, type Tag } from "../api/client";
+import TagMultiSelect from "./TagMultiSelect";
 
 export default function LogMoment() {
   const [tags, setTags] = createSignal<Tag[]>([]);
@@ -16,8 +17,16 @@ export default function LogMoment() {
 
   onMount(loadTags);
 
-  const toggleTag = (id: string) => {
-    setSelected((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+  const createTag = async (name: string) => {
+    try {
+      const tag = await api.createTag(name);
+      await loadTags();
+      setError("");
+      return tag;
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    }
   };
 
   const toLocalInput = (iso?: string) => {
@@ -90,22 +99,14 @@ export default function LogMoment() {
         </Show>
       </div>
 
-      <div class="field">
+      <div class="field log-moment-tags">
         <label>Tags (at least one)</label>
-        <div class="tag-chip-list">
-          {tags().map((tag) => (
-            <button
-              type="button"
-              class={`tag-chip ${selected().includes(tag.id) ? "selected" : ""}`}
-              onClick={() => toggleTag(tag.id)}
-            >
-              {tag.name}
-            </button>
-          ))}
-        </div>
-        <Show when={selected().length === 0}>
-          <span class="muted">Select at least one tag to save.</span>
-        </Show>
+        <TagMultiSelect
+          tags={tags()}
+          selected={selected()}
+          onChange={setSelected}
+          onCreateTag={createTag}
+        />
       </div>
 
       <div class="field log-moment-time">
