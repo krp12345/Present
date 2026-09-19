@@ -2,7 +2,7 @@
 
 A personal log of what is happening in the present moment. Over time the logs are meant to be analysed; pattern views are not part of this first slice.
 
-This repository is the product and its documentation. Application code is not in this slice of work.
+This repository is the product, its documentation, and a runnable first implementation.
 
 ## Who it is for
 

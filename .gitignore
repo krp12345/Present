@@ -4,3 +4,5 @@
 *.pem
 *.key
 node_modules/
+web/dist/
+server/present-server
