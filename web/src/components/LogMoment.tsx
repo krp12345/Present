@@ -1,6 +1,6 @@
-import { Show, createEffect, createSignal, onMount } from "solid-js";
+import { For, Show, createEffect, createMemo, createSignal, onMount } from "solid-js";
 import { api, type RecordItem, type Tag } from "../api/client";
-import TagMultiSelect from "./TagMultiSelect";
+import TagPickerSheet from "./TagPickerSheet";
 
 export default function LogMoment() {
   const [tags, setTags] = createSignal<Tag[]>([]);
@@ -10,6 +10,8 @@ export default function LogMoment() {
   const [saved, setSaved] = createSignal<RecordItem | null>(null);
   const [error, setError] = createSignal("");
   const [loading, setLoading] = createSignal(false);
+  const [pickerOpen, setPickerOpen] = createSignal(false);
+  const [draftSelected, setDraftSelected] = createSignal<string[]>([]);
 
   const loadTags = async () => {
     setTags(await api.listTags());
@@ -85,6 +87,28 @@ export default function LogMoment() {
 
   const canSave = () => selected().length > 0 && !loading();
 
+  const selectedTags = createMemo(() =>
+    selected()
+      .map((id) => tags().find((tag) => tag.id === id))
+      .filter((tag): tag is Tag => !!tag)
+  );
+
+  const openPicker = () => {
+    setDraftSelected([...selected()]);
+    setPickerOpen(true);
+  };
+
+  const closePicker = () => setPickerOpen(false);
+
+  const donePicker = () => {
+    setSelected(draftSelected());
+    setPickerOpen(false);
+  };
+
+  const removeSelectedTag = (id: string) => {
+    setSelected((prev) => prev.filter((x) => x !== id));
+  };
+
   return (
     <div class="screen log-moment">
       <div class="field log-moment-description">
@@ -101,13 +125,47 @@ export default function LogMoment() {
 
       <div class="field log-moment-tags">
         <label>Tags (at least one)</label>
-        <TagMultiSelect
-          tags={tags()}
-          selected={selected()}
-          onChange={setSelected}
-          onCreateTag={createTag}
-        />
+        <div class="tag-picker-summary">
+          <Show
+            when={selectedTags().length > 0}
+            fallback={<span class="muted">No tags selected</span>}
+          >
+            <div class="tag-chip-list">
+              <For each={selectedTags()}>
+                {(tag) => (
+                  <span class="tag-chip selected">
+                    {tag.name}
+                    <button
+                      type="button"
+                      class="tag-picker-remove"
+                      aria-label={`Remove ${tag.name}`}
+                      onClick={() => removeSelectedTag(tag.id)}
+                    >
+                      ×
+                    </button>
+                  </span>
+                )}
+              </For>
+            </div>
+          </Show>
+          <button type="button" class="secondary" onClick={openPicker}>
+            {selectedTags().length > 0 ? "Edit tags" : "Add tags"}
+          </button>
+        </div>
+        <Show when={selected().length === 0}>
+          <span class="muted">Select at least one tag to save.</span>
+        </Show>
       </div>
+
+      <TagPickerSheet
+        open={pickerOpen()}
+        tags={tags()}
+        selected={draftSelected()}
+        onSelectedChange={setDraftSelected}
+        onClose={closePicker}
+        onDone={donePicker}
+        onCreateTag={createTag}
+      />
 
       <div class="field log-moment-time">
         <label>Time (defaults to now)</label>

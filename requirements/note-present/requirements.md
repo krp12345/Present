@@ -28,18 +28,20 @@ When that tag is picked from the searchable tag picker
 And save is requested
 Then the record is saved with that tag
 
-## Tags are picked with a searchable multi-select
+## Tags are picked in a full-screen tag picker
 
 Given the log-the-moment screen is shown
-When the tag picker is used
-Then more than one existing tag can be chosen
-And the chosen tags are shown as removable chips
+When add tags is used
+Then a full-screen tag picker is shown
+And more than one existing tag can be chosen there
+And the chosen tags are shown as removable chips on the log screen
 
 ## New tag can be added from the tag picker search
 
-Given the log-the-moment screen is shown
+Given the full-screen tag picker is shown
 When a tag name is searched that does not already exist
 And that name is added from the picker
+And done is used
 And save is requested
 Then the record is saved with that tag
 And the tag is available later on the pick list
