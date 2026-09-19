@@ -14,27 +14,46 @@
 
 * { box-sizing: border-box; }
 
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
 }
 
-#root { min-height: 100vh; }
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+
+html.scroll-locked,
+body.scroll-locked,
+main.screen.scroll-locked {
+  overflow: hidden !important;
+}
 
 .app-shell {
   --app-shell-padding: 1rem;
   max-width: 720px;
   margin: 0 auto;
   padding: var(--app-shell-padding);
-  min-height: 100vh;
+  height: 100%;
+  max-height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .app-shell > main.screen {
   flex: 1;
   min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .screen {
@@ -46,6 +65,8 @@ body {
 .log-moment {
   flex: 1;
   min-height: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
 .log-moment-description {
@@ -223,6 +244,9 @@ button.secondary:disabled {
 
 .tag-multi-select-chips {
   margin-bottom: 0.15rem;
+  max-height: 5.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .tag-multi-select-chip {
@@ -266,6 +290,7 @@ button.secondary:disabled {
   flex-direction: column;
   gap: 0.2rem;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+  box-sizing: border-box;
 }
 
 .tag-multi-select-option,
@@ -323,7 +348,8 @@ button.secondary:disabled {
 .filters { display: flex; flex-direction: column; gap: 0.5rem; }
 
 .login-screen {
-  min-height: 100vh;
+  height: 100%;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;

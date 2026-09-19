@@ -1,5 +1,20 @@
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from "solid-js";
+import { Portal } from "solid-js/web";
 import type { Tag } from "../api/client";
+
+const SCROLL_LOCK_CLASS = "scroll-locked";
+
+function lockPageScroll() {
+  document.documentElement.classList.add(SCROLL_LOCK_CLASS);
+  document.body.classList.add(SCROLL_LOCK_CLASS);
+  document.querySelector("main.screen")?.classList.add(SCROLL_LOCK_CLASS);
+}
+
+function unlockPageScroll() {
+  document.documentElement.classList.remove(SCROLL_LOCK_CLASS);
+  document.body.classList.remove(SCROLL_LOCK_CLASS);
+  document.querySelector("main.screen")?.classList.remove(SCROLL_LOCK_CLASS);
+}
 
 type Props = {
   tags: Tag[];
@@ -22,6 +37,7 @@ export default function TagMultiSelect(props: Props) {
   const [dropdownStyle, setDropdownStyle] = createSignal<DropdownPosition | null>(null);
   let rootRef: HTMLDivElement | undefined;
   let inputRef: HTMLInputElement | undefined;
+  let dropdownRef: HTMLDivElement | undefined;
 
   const query = createMemo(() => search().trim());
   const queryLower = createMemo(() => query().toLowerCase());
@@ -86,22 +102,28 @@ export default function TagMultiSelect(props: Props) {
 
   onMount(() => {
     const onDocClick = (e: MouseEvent) => {
-      if (!open() || !rootRef) return;
-      if (!rootRef.contains(e.target as Node)) setOpen(false);
+      if (!open()) return;
+      const target = e.target as Node;
+      if (rootRef?.contains(target)) return;
+      if (dropdownRef?.contains(target)) return;
+      setOpen(false);
     };
     document.addEventListener("mousedown", onDocClick);
-    onCleanup(() => document.removeEventListener("mousedown", onDocClick));
+    onCleanup(() => {
+      document.removeEventListener("mousedown", onDocClick);
+      unlockPageScroll();
+    });
   });
 
   createEffect(() => {
     if (!open()) {
-      document.body.style.overflow = "";
+      unlockPageScroll();
       setDropdownStyle(null);
       return;
     }
 
     updateDropdownPosition();
-    document.body.style.overflow = "hidden";
+    lockPageScroll();
 
     const onLayout = () => updateDropdownPosition();
     const onKeyDown = (e: KeyboardEvent) => {
@@ -113,7 +135,7 @@ export default function TagMultiSelect(props: Props) {
     window.addEventListener("keydown", onKeyDown);
 
     onCleanup(() => {
-      document.body.style.overflow = "";
+      unlockPageScroll();
       window.removeEventListener("resize", onLayout);
       window.removeEventListener("scroll", onLayout, true);
       window.removeEventListener("keydown", onKeyDown);
@@ -161,45 +183,48 @@ export default function TagMultiSelect(props: Props) {
       </Show>
 
       <Show when={open() && dropdownStyle()}>
-        <div
-          class="tag-multi-select-dropdown"
-          role="listbox"
-          aria-multiselectable="true"
-          style={{
-            top: dropdownStyle()!.top,
-            left: dropdownStyle()!.left,
-            width: dropdownStyle()!.width,
-            "max-height": dropdownStyle()!.maxHeight,
-          }}
-        >
-          <For each={filteredTags()}>
-            {(tag) => {
-              const isSelected = () => props.selected.includes(tag.id);
-              return (
-                <button
-                  type="button"
-                  class={`tag-multi-select-option ${isSelected() ? "selected" : ""}`}
-                  role="option"
-                  aria-selected={isSelected()}
-                  onClick={() => toggleTag(tag.id)}
-                >
-                  <span class="tag-multi-select-check">{isSelected() ? "✓" : ""}</span>
-                  <span>{tag.name}</span>
-                </button>
-              );
+        <Portal>
+          <div
+            ref={dropdownRef}
+            class="tag-multi-select-dropdown"
+            role="listbox"
+            aria-multiselectable="true"
+            style={{
+              top: dropdownStyle()!.top,
+              left: dropdownStyle()!.left,
+              width: dropdownStyle()!.width,
+              height: dropdownStyle()!.maxHeight,
             }}
-          </For>
+          >
+            <For each={filteredTags()}>
+              {(tag) => {
+                const isSelected = () => props.selected.includes(tag.id);
+                return (
+                  <button
+                    type="button"
+                    class={`tag-multi-select-option ${isSelected() ? "selected" : ""}`}
+                    role="option"
+                    aria-selected={isSelected()}
+                    onClick={() => toggleTag(tag.id)}
+                  >
+                    <span class="tag-multi-select-check">{isSelected() ? "✓" : ""}</span>
+                    <span>{tag.name}</span>
+                  </button>
+                );
+              }}
+            </For>
 
-          <Show when={canAdd()}>
-            <button type="button" class="tag-multi-select-add" onClick={addTag} disabled={creating()}>
-              {creating() ? "Adding…" : `Add "${query()}"`}
-            </button>
-          </Show>
+            <Show when={canAdd()}>
+              <button type="button" class="tag-multi-select-add" onClick={addTag} disabled={creating()}>
+                {creating() ? "Adding…" : `Add "${query()}"`}
+              </button>
+            </Show>
 
-          <Show when={filteredTags().length === 0 && !canAdd()}>
-            <p class="muted tag-multi-select-empty">No tags found.</p>
-          </Show>
-        </div>
+            <Show when={filteredTags().length === 0 && !canAdd()}>
+              <p class="muted tag-multi-select-empty">No tags found.</p>
+            </Show>
+          </div>
+        </Portal>
       </Show>
 
       <Show when={props.selected.length === 0}>
