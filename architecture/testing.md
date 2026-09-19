@@ -4,6 +4,8 @@
 
 Automated checks should follow `requirements/`, not the internals of a given implementation.
 
+In the first implementation phase, no automated suite is written. The operator tests manually against `requirements/`; automated checks are added after manual verification is complete (`implementation.md`).
+
 - One module folder has one `requirements.md`.
 - Each `##` heading in that file is one test (one Given–When–Then).
 - The hook is the **heading title** under `requirements/<module>/requirements.md`, not a numeric id and not a function or route name in source.

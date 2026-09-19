@@ -32,3 +32,9 @@ Modules the UI exposes after unlock: log the moment (default), history, tag mana
 - **Remote reachability:** direct access by IP address — LAN IP at home, public IP from the personal phone on personal mobile data. No VPN or tunnel. A paid domain is not used. The operator keeps the current public IP reachable (for example a command someone at home runs and shares, or a private note on the phone). Details: `reachability.md`.
 - **HTTPS certificates:** private CA operated by the operator; root cert installed on the home PC and personal phone. Details: `transport.md`.
 - **Static key storage:** OS secret store on the home machine (for example Linux keyring or macOS Keychain). Must not be committed to the repository. Details: `data.md`.
+
+## Implementation stack
+
+- **Server:** Go, `net/http`, `pgx` with hand-written SQL.
+- **Client:** SolidJS SPA talking to a Go JSON API.
+- **Testing:** manual verification against `requirements/` first; automated tests deferred until after that. Details: `implementation.md`, `testing.md`.

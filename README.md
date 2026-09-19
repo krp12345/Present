@@ -17,7 +17,7 @@ After unlock, write what is happening (optional), attach at least one tag, and s
 | Place | What belongs there |
 | --- | --- |
 | `requirements/` | Observable behaviour only. No technology. One file per module. Each `##` heading is one Given–When–Then and maps to one test. Tests bind to the **heading title**, not to source internals. |
-| `architecture/` | How the system is shaped: parts, access, storage, reachability. Technical, not source code. |
+| `architecture/` | How the system is shaped: parts, access, storage, reachability, implementation stack. Technical, not source code. |
 
 These two trees are the source of truth. Interview notes are not kept in the repository.
 
