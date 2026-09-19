@@ -86,10 +86,14 @@ export default function TagManagement() {
       </div>
 
       <Show when={confirmRemove()}>
-        <div class="record-card">
-          <p>Remove tag “{confirmRemove()!.name}”?</p>
-          <button type="button" class="danger" onClick={remove}>Confirm remove</button>
-          <button type="button" class="secondary" onClick={() => setConfirmRemove(null)}>Cancel</button>
+        <div class="modal-overlay" onClick={() => setConfirmRemove(null)}>
+          <div class="modal-dialog" onClick={(e) => e.stopPropagation()}>
+            <p>Remove tag “{confirmRemove()!.name}”?</p>
+            <div style="display:flex; gap:0.5rem;">
+              <button type="button" class="danger" onClick={remove}>Confirm remove</button>
+              <button type="button" class="secondary" onClick={() => setConfirmRemove(null)}>Cancel</button>
+            </div>
+          </div>
         </div>
       </Show>
     </div>
