@@ -4,15 +4,15 @@ All client–server communication is **HTTPS**. The key in the header, the tempo
 
 HTTP is not served. A client that speaks HTTP does not get a redirect and does not get the app.
 
-This applies on the home network and when the personal phone is away from home on personal mobile data. Reachability (LAN IP, tunnel, VPN) must still present HTTPS to the browser.
+This applies on the home network and when the personal phone is away from home on personal mobile data. Reachability is by IP address (LAN or public); HTTPS is still required. Details: `reachability.md`.
 
 Office Wi‑Fi and office devices are not clients.
 
 ## Certificates
 
-A certificate is required for HTTPS. The source is not chosen yet (self-signed, private CA, or HTTPS terminated by a tunnel/VPN). A paid public domain is still out of scope, so a public web CA is not assumed.
+HTTPS uses a certificate issued by a **private CA** operated by the operator. A paid public domain is out of scope, so a public web CA is not used.
 
-Until that choice is made, architecture only requires: the browser talks HTTPS to Present; the operator will install or trust whatever certificate that choice needs on the home PC and the personal phone.
+The operator runs the CA and issues a server certificate for the home machine. The CA root certificate is installed and trusted on the home PC and on the personal phone. Because access is by IP address rather than a domain name, the server certificate must be valid for the addresses in use (LAN IP, public IP, or both, depending on how the operator configures it).
 
 ## Secrets on the wire
 
