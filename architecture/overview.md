@@ -6,14 +6,15 @@ There is no user account table and no username. Identity is a configured static 
 
 ```
 Browser (home PC or personal phone)
-    -> HTTPS only
+    -> HTTPS only (private CA)
     -> header with static key (unlock only)
     -> header with temporary key (after unlock)
 Home server
-    -> persistent store (choice open)
+    -> PostgreSQL
+    -> static key from OS secret store
 ```
 
-HTTP is not served. Certificate source is still open (see `transport.md`).
+HTTP is not served. Certificates come from a private CA (see `transport.md`).
 
 Modules the UI exposes after unlock: log the moment (default), history, tag management. Navigation between them is a shell (side menu). Pattern analysis is not a module yet.
 
@@ -25,8 +26,9 @@ Modules the UI exposes after unlock: log the moment (default), history, tag mana
 - **Tags:** stable internal id, visible name, soft-delete flag.
 - **History:** list, filter, edit, soft-delete records; refuse stale saves using a version on each record.
 
-## What is still open
+## Decided infrastructure
 
-- Which persistent store to use.
-- How the home process is reached from the personal phone on personal mobile data without a paid domain (tunnel, VPN, or similar). The need is decided; the mechanism is not.
-- Where the HTTPS certificate comes from. HTTPS itself is decided (`transport.md`).
+- **Persistent store:** PostgreSQL on the home machine.
+- **Remote reachability:** direct access by IP address — LAN IP at home, public IP from the personal phone on personal mobile data. No VPN or tunnel. A paid domain is not used. The operator keeps the current public IP reachable (for example a command someone at home runs and shares, or a private note on the phone). Details: `reachability.md`.
+- **HTTPS certificates:** private CA operated by the operator; root cert installed on the home PC and personal phone. Details: `transport.md`.
+- **Static key storage:** OS secret store on the home machine (for example Linux keyring or macOS Keychain). Must not be committed to the repository. Details: `data.md`.

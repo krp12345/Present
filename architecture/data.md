@@ -1,6 +1,6 @@
 # Data
 
-The durable store is required. The product does not pick an engine yet (SQLite, Postgres, files, or other). Architecture only needs a store that survives process restart and can be queried by the operator.
+The durable store is **PostgreSQL** on the home machine. It must survive process restart and can be queried by the operator.
 
 ## Tag
 
@@ -22,8 +22,8 @@ Records refer to tags by id. Renaming a tag changes the name everywhere those id
 
 ## Lockout state
 
-Failure counts and blocked identities must live in the persistent store so restart does not clear them.
+Failure counts and blocked identities must live in PostgreSQL so restart does not clear them.
 
 ## Configuration
 
-The static key lives in server configuration, not in the record/tag data. Exact secret storage is not chosen yet; it must not be committed to the repository.
+The static key lives in server configuration, not in the record/tag data. It is read from the **OS secret store** on the home machine (for example Linux keyring or macOS Keychain). It must not be committed to the repository.
