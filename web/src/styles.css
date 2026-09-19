@@ -115,16 +115,8 @@ button.danger { background: var(--danger); color: white; }
 }
 
 .side-menu-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
   padding: var(--app-shell-padding);
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.side-menu-header h2 {
-  margin: 0;
+  padding-bottom: 0;
 }
 
 .side-menu-panel > .secondary {

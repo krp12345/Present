@@ -57,7 +57,6 @@ export default function Layout(props: Props) {
             >
               ✕
             </button>
-            <h2>Menu</h2>
           </div>
           <button type="button" class="secondary" onClick={() => navigate("log")}>Log the moment</button>
           <button type="button" class="secondary" onClick={() => navigate("history")}>History</button>
