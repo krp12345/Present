@@ -74,11 +74,17 @@ export default function LogMoment() {
     if (!saved() && !momentAt()) setMomentAt("");
   });
 
+  const canSave = () => selected().length > 0 && !loading();
+
   return (
-    <div class="screen">
-      <div class="field">
+    <div class="screen log-moment">
+      <div class="field log-moment-description">
         <label>Description (optional)</label>
-        <textarea value={description()} onInput={(e) => setDescription(e.currentTarget.value)} />
+        <textarea
+          class="log-moment-textarea"
+          value={description()}
+          onInput={(e) => setDescription(e.currentTarget.value)}
+        />
         <Show when={descLen() > 900}>
           <span class="muted">{descLen()} / 1000</span>
         </Show>
@@ -86,7 +92,7 @@ export default function LogMoment() {
 
       <div class="field">
         <label>Tags (at least one)</label>
-        <div>
+        <div class="tag-chip-list">
           {tags().map((tag) => (
             <button
               type="button"
@@ -97,9 +103,12 @@ export default function LogMoment() {
             </button>
           ))}
         </div>
+        <Show when={selected().length === 0}>
+          <span class="muted">Select at least one tag to save.</span>
+        </Show>
       </div>
 
-      <div class="field">
+      <div class="field log-moment-time">
         <label>Time (defaults to now)</label>
         <input
           type="datetime-local"
@@ -113,17 +122,19 @@ export default function LogMoment() {
       </Show>
 
       <Show when={!saved()} fallback={
-        <>
+        <div class="log-moment-actions">
           <p class="muted">Saved. You can edit this record below.</p>
-          <button type="button" onClick={updateSaved} disabled={loading()}>Update record</button>
+          <button type="button" onClick={updateSaved} disabled={!canSave()}>Update record</button>
           <button type="button" class="secondary" onClick={() => { setSaved(null); setDescription(""); setSelected([]); setMomentAt(""); }}>
             Log another
           </button>
-        </>
+        </div>
       }>
-        <button type="button" onClick={save} disabled={loading() || selected().length === 0}>
-          {loading() ? "Saving…" : "Save"}
-        </button>
+        <div class="log-moment-actions">
+          <button type="button" onClick={save} disabled={!canSave()}>
+            {loading() ? "Saving…" : "Save"}
+          </button>
+        </div>
       </Show>
     </div>
   );

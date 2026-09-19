@@ -27,12 +27,49 @@ body {
   max-width: 720px;
   margin: 0 auto;
   padding: var(--app-shell-padding);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-shell > main.screen {
+  flex: 1;
+  min-height: 0;
 }
 
 .screen {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.log-moment {
+  flex: 1;
+  min-height: 0;
+}
+
+.log-moment-description {
+  flex: 1;
+  min-height: 0;
+}
+
+.log-moment-textarea {
+  flex: 1;
+  min-height: 8rem;
+  resize: none;
+  width: 100%;
+}
+
+.log-moment-time {
+  flex-shrink: 0;
+}
+
+.log-moment-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  margin-top: auto;
 }
 
 h1, h2 { margin: 0; font-size: 1.25rem; }
@@ -63,6 +100,20 @@ button.secondary {
 }
 
 button.danger { background: var(--danger); color: white; }
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 1;
+  background: color-mix(in srgb, var(--border) 75%, var(--surface));
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+button.secondary:disabled {
+  background: transparent;
+  color: var(--muted);
+  border-color: color-mix(in srgb, var(--border) 80%, transparent);
+}
 
 .error { color: var(--danger); }
 .muted { color: var(--muted); font-size: 0.9rem; }
@@ -140,6 +191,12 @@ button.danger { background: var(--danger); color: white; }
   gap: 0.75rem;
 }
 
+.tag-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
 .tag-chip {
   display: inline-flex;
   align-items: center;
@@ -147,7 +204,6 @@ button.danger { background: var(--danger); color: white; }
   padding: 0.35rem 0.6rem;
   border-radius: 999px;
   border: 1px solid var(--border);
-  margin: 0.2rem;
   font-size: 0.9rem;
 }
 
