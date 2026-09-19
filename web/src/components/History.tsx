@@ -104,10 +104,14 @@ export default function History() {
       </div>
 
       <Show when={confirmDelete()}>
-        <div class="record-card">
-          <p>Delete this record?</p>
-          <button type="button" class="danger" onClick={deleteRec}>Confirm delete</button>
-          <button type="button" class="secondary" onClick={() => setConfirmDelete(null)}>Cancel</button>
+        <div class="modal-overlay" onClick={() => setConfirmDelete(null)}>
+          <div class="modal-dialog" onClick={(e) => e.stopPropagation()}>
+            <p>Delete this record?</p>
+            <div style="display:flex; gap:0.5rem;">
+              <button type="button" class="danger" onClick={deleteRec}>Confirm delete</button>
+              <button type="button" class="secondary" onClick={() => setConfirmDelete(null)}>Cancel</button>
+            </div>
+          </div>
         </div>
       </Show>
     </div>
