@@ -8,11 +8,20 @@ type Props = {
   onCreateTag: (name: string) => Promise<Tag>;
 };
 
+type DropdownPosition = {
+  top: string;
+  left: string;
+  width: string;
+  maxHeight: string;
+};
+
 export default function TagMultiSelect(props: Props) {
   const [search, setSearch] = createSignal("");
   const [open, setOpen] = createSignal(false);
   const [creating, setCreating] = createSignal(false);
+  const [dropdownStyle, setDropdownStyle] = createSignal<DropdownPosition | null>(null);
   let rootRef: HTMLDivElement | undefined;
+  let inputRef: HTMLInputElement | undefined;
 
   const query = createMemo(() => search().trim());
   const queryLower = createMemo(() => query().toLowerCase());
@@ -60,6 +69,21 @@ export default function TagMultiSelect(props: Props) {
     }
   };
 
+  const updateDropdownPosition = () => {
+    if (!inputRef) return;
+    const rect = inputRef.getBoundingClientRect();
+    const gap = 6;
+    const edge = 12;
+    const top = rect.bottom + gap;
+    const maxHeight = Math.max(window.innerHeight - top - edge, 120);
+    setDropdownStyle({
+      top: `${top}px`,
+      left: `${rect.left}px`,
+      width: `${rect.width}px`,
+      maxHeight: `${maxHeight}px`,
+    });
+  };
+
   onMount(() => {
     const onDocClick = (e: MouseEvent) => {
       if (!open() || !rootRef) return;
@@ -70,12 +94,30 @@ export default function TagMultiSelect(props: Props) {
   });
 
   createEffect(() => {
-    if (!open()) return;
+    if (!open()) {
+      document.body.style.overflow = "";
+      setDropdownStyle(null);
+      return;
+    }
+
+    updateDropdownPosition();
+    document.body.style.overflow = "hidden";
+
+    const onLayout = () => updateDropdownPosition();
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
+
+    window.addEventListener("resize", onLayout);
+    window.addEventListener("scroll", onLayout, true);
     window.addEventListener("keydown", onKeyDown);
-    onCleanup(() => window.removeEventListener("keydown", onKeyDown));
+
+    onCleanup(() => {
+      document.body.style.overflow = "";
+      window.removeEventListener("resize", onLayout);
+      window.removeEventListener("scroll", onLayout, true);
+      window.removeEventListener("keydown", onKeyDown);
+    });
   });
 
   return (
@@ -102,6 +144,7 @@ export default function TagMultiSelect(props: Props) {
 
       <div class="tag-multi-select-input-wrap">
         <input
+          ref={inputRef}
           type="text"
           class="tag-multi-select-input"
           placeholder="Search or add tags…"
@@ -117,8 +160,18 @@ export default function TagMultiSelect(props: Props) {
         <span class="muted">{query().length} / 200</span>
       </Show>
 
-      <Show when={open()}>
-        <div class="tag-multi-select-dropdown" role="listbox" aria-multiselectable="true">
+      <Show when={open() && dropdownStyle()}>
+        <div
+          class="tag-multi-select-dropdown"
+          role="listbox"
+          aria-multiselectable="true"
+          style={{
+            top: dropdownStyle()!.top,
+            left: dropdownStyle()!.left,
+            width: dropdownStyle()!.width,
+            "max-height": dropdownStyle()!.maxHeight,
+          }}
+        >
           <For each={filteredTags()}>
             {(tag) => {
               const isSelected = () => props.selected.includes(tag.id);

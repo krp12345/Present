@@ -254,13 +254,10 @@ button.secondary:disabled {
 }
 
 .tag-multi-select-dropdown {
-  position: absolute;
-  top: calc(100% + 0.25rem);
-  left: 0;
-  right: 0;
-  z-index: 50;
-  max-height: min(16rem, 40vh);
+  position: fixed;
+  z-index: 150;
   overflow-y: auto;
+  overscroll-behavior: contain;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
