@@ -71,13 +71,9 @@ button.danger { background: var(--danger); color: white; }
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  position: sticky;
-  top: 0;
-  z-index: 120;
   min-height: var(--app-header-height);
   margin: 0 calc(-1 * var(--app-shell-padding));
   padding: 0 var(--app-shell-padding) 0.75rem;
-  background: var(--bg);
 }
 
 .top-bar h1 {
@@ -98,28 +94,52 @@ button.danger { background: var(--danger); color: white; }
 
 .side-menu-backdrop {
   position: fixed;
-  top: calc(var(--app-shell-padding) + var(--app-header-height));
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 100;
+  inset: 0;
+  z-index: 120;
   background: rgba(0, 0, 0, 0.45);
 }
 
 .side-menu-panel {
   position: fixed;
-  top: calc(var(--app-shell-padding) + var(--app-header-height));
+  top: 0;
   left: 0;
   bottom: 0;
-  z-index: 110;
+  z-index: 130;
   width: min(280px, 85vw);
   background: var(--surface);
   border-right: 1px solid var(--border);
-  padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   overflow-y: auto;
+}
+
+.side-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: var(--app-shell-padding);
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.side-menu-header h2 {
+  margin: 0;
+}
+
+.side-menu-panel > .secondary {
+  margin: 0 var(--app-shell-padding);
+}
+
+.side-menu-panel > .secondary:first-of-type {
+  margin-top: var(--app-shell-padding);
+}
+
+.side-menu-lock {
+  position: fixed;
+  top: var(--app-shell-padding);
+  right: var(--app-shell-padding);
+  z-index: 140;
 }
 
 .tag-list, .record-list {

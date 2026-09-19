@@ -27,31 +27,43 @@ export default function Layout(props: Props) {
 
   return (
     <div class="app-shell">
-      <header class="top-bar">
-        <button
-          type="button"
-          class="menu-btn secondary"
-          onClick={() => setMenuOpen((open) => !open)}
-          aria-label={menuOpen() ? "Close menu" : "Open menu"}
-          aria-expanded={menuOpen()}
-        >
-          {menuOpen() ? "✕" : "☰"}
-        </button>
-        <Show when={!menuOpen()}>
+      <Show when={!menuOpen()}>
+        <header class="top-bar">
+          <button
+            type="button"
+            class="menu-btn secondary"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Open menu"
+            aria-expanded={false}
+          >
+            ☰
+          </button>
           <h1>
             {props.screen === "log" ? "Log the moment" : props.screen === "history" ? "History" : "Tag management"}
           </h1>
-        </Show>
-        <button type="button" class="secondary top-bar-lock" onClick={props.onLogout}>Lock</button>
-      </header>
+          <button type="button" class="secondary top-bar-lock" onClick={props.onLogout}>Lock</button>
+        </header>
+      </Show>
 
       <Show when={menuOpen()}>
         <div class="side-menu-backdrop" onClick={() => setMenuOpen(false)} />
         <nav class="side-menu-panel">
+          <div class="side-menu-header">
+            <button
+              type="button"
+              class="menu-btn secondary"
+              onClick={() => setMenuOpen(false)}
+              aria-label="Close menu"
+            >
+              ✕
+            </button>
+            <h2>Menu</h2>
+          </div>
           <button type="button" class="secondary" onClick={() => navigate("log")}>Log the moment</button>
           <button type="button" class="secondary" onClick={() => navigate("history")}>History</button>
           <button type="button" class="secondary" onClick={() => navigate("tags")}>Tag management</button>
         </nav>
+        <button type="button" class="secondary side-menu-lock" onClick={props.onLogout}>Lock</button>
       </Show>
 
       <main class="screen">{props.children}</main>
