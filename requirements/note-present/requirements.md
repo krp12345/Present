@@ -28,14 +28,6 @@ When that tag is picked
 And save is requested
 Then the record is saved with that tag
 
-## New tag can be created while logging
-
-Given the log-the-moment screen is shown
-When a new tag name is created there
-And save is requested
-Then the record is saved with that tag
-And the tag is available later on the pick list
-
 ## Time defaults to now
 
 Given the log-the-moment screen is shown
@@ -72,37 +64,23 @@ And save is requested
 Then a validation error is shown
 And the record is not saved
 
-## Tag name longer than two hundred characters is rejected
-
-Given a tag name is being entered
-When the name is longer than 200 characters
-Then a validation error is shown
-And that name is not accepted as a tag
-
 ## Description count appears after nine hundred characters
 
 Given a description is being typed
 When its length exceeds 900 characters
 Then the current count and the maximum of 1000 are shown
 
-## Tag name count appears after one hundred ninety characters
-
-Given a tag name is being typed
-When its length exceeds 190 characters
-Then the current count and the maximum of 200 are shown
-
-## Character counts are hidden below the thresholds
+## Character count is hidden below the threshold
 
 Given a description of at most 900 characters
-And a tag name of at most 190 characters
-When those fields are shown
-Then the character counts are not shown
+When that field is shown
+Then the character count is not shown
 
 ## Unicode text is accepted
 
 Given the log-the-moment screen is shown
-When a description and a tag name use characters that are not English letters
-And the lengths are within the limits
+When a description uses characters that are not English letters
+And the length is within the limit
 And at least one tag is attached
 And save is requested
 Then the record is saved with that text unchanged

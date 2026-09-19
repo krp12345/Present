@@ -46,3 +46,22 @@ Given a tag already exists with a name
 When another tag is added or renamed to that same name
 Then the change is not accepted
 And there are not two tags with that name
+
+## Tag name longer than two hundred characters is rejected
+
+Given a tag name is being entered on the tag management screen
+When the name is longer than 200 characters
+Then a validation error is shown
+And that name is not accepted as a tag
+
+## Tag name count appears after one hundred ninety characters
+
+Given a tag name is being typed on the tag management screen
+When its length exceeds 190 characters
+Then the current count and the maximum of 200 are shown
+
+## Character counts are hidden below the thresholds
+
+Given a tag name of at most 190 characters
+When that field is shown on the tag management screen
+Then the character count is not shown

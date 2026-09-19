@@ -4,7 +4,6 @@ import { api, type RecordItem, type Tag } from "../api/client";
 export default function LogMoment() {
   const [tags, setTags] = createSignal<Tag[]>([]);
   const [selected, setSelected] = createSignal<string[]>([]);
-  const [newTag, setNewTag] = createSignal("");
   const [description, setDescription] = createSignal("");
   const [momentAt, setMomentAt] = createSignal("");
   const [saved, setSaved] = createSignal<RecordItem | null>(null);
@@ -19,20 +18,6 @@ export default function LogMoment() {
 
   const toggleTag = (id: string) => {
     setSelected((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
-  };
-
-  const addTag = async () => {
-    const name = newTag().trim();
-    if (!name) return;
-    try {
-      const tag = await api.createTag(name);
-      await loadTags();
-      setSelected((prev) => [...prev, tag.id]);
-      setNewTag("");
-      setError("");
-    } catch (err: any) {
-      setError(err.message);
-    }
   };
 
   const toLocalInput = (iso?: string) => {
@@ -84,7 +69,6 @@ export default function LogMoment() {
   };
 
   const descLen = () => description().length;
-  const tagLen = () => newTag().length;
 
   createEffect(() => {
     if (!saved() && !momentAt()) setMomentAt("");
@@ -113,17 +97,6 @@ export default function LogMoment() {
             </button>
           ))}
         </div>
-        <div style="display:flex; gap:0.5rem;">
-          <input
-            placeholder="New tag"
-            value={newTag()}
-            onInput={(e) => setNewTag(e.currentTarget.value)}
-          />
-          <button type="button" class="secondary" onClick={addTag}>Add</button>
-        </div>
-        <Show when={tagLen() > 190}>
-          <span class="muted">{tagLen()} / 200</span>
-        </Show>
       </div>
 
       <div class="field">
