@@ -1,4 +1,4 @@
-import { Show, createSignal } from "solid-js";
+import { Show, createEffect, createSignal, onCleanup } from "solid-js";
 import type { Screen } from "../App";
 
 type Props = {
@@ -16,10 +16,27 @@ export default function Layout(props: Props) {
     setMenuOpen(false);
   };
 
+  createEffect(() => {
+    if (!menuOpen()) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    onCleanup(() => window.removeEventListener("keydown", onKeyDown));
+  });
+
   return (
     <div class="app-shell">
       <div class="top-bar">
-        <button type="button" class="menu-btn secondary" onClick={() => setMenuOpen(true)} aria-label="Open menu">☰</button>
+        <button
+          type="button"
+          class="menu-btn secondary"
+          onClick={() => setMenuOpen((open) => !open)}
+          aria-label={menuOpen() ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen()}
+        >
+          {menuOpen() ? "✕" : "☰"}
+        </button>
         <h1>
           {props.screen === "log" ? "Log the moment" : props.screen === "history" ? "History" : "Tag management"}
         </h1>
@@ -33,7 +50,6 @@ export default function Layout(props: Props) {
             <button type="button" class="secondary" onClick={() => navigate("log")}>Log the moment</button>
             <button type="button" class="secondary" onClick={() => navigate("history")}>History</button>
             <button type="button" class="secondary" onClick={() => navigate("tags")}>Tag management</button>
-            <button type="button" class="secondary" onClick={() => setMenuOpen(false)}>Close</button>
           </nav>
         </div>
       </Show>

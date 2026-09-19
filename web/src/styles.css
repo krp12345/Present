@@ -70,6 +70,8 @@ button.danger { background: var(--danger); color: white; }
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
+  position: relative;
+  z-index: 110;
 }
 
 .menu-btn {
@@ -83,6 +85,7 @@ button.danger { background: var(--danger); color: white; }
   inset: 0;
   background: rgba(0,0,0,0.45);
   display: flex;
+  z-index: 100;
 }
 
 .side-menu nav {
