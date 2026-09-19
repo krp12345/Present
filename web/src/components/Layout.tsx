@@ -27,7 +27,7 @@ export default function Layout(props: Props) {
 
   return (
     <div class="app-shell">
-      <div class="top-bar">
+      <header class="top-bar">
         <button
           type="button"
           class="menu-btn secondary"
@@ -37,21 +37,21 @@ export default function Layout(props: Props) {
         >
           {menuOpen() ? "✕" : "☰"}
         </button>
-        <h1>
-          {props.screen === "log" ? "Log the moment" : props.screen === "history" ? "History" : "Tag management"}
-        </h1>
-        <button type="button" class="secondary" onClick={props.onLogout}>Lock</button>
-      </div>
+        <Show when={!menuOpen()}>
+          <h1>
+            {props.screen === "log" ? "Log the moment" : props.screen === "history" ? "History" : "Tag management"}
+          </h1>
+        </Show>
+        <button type="button" class="secondary top-bar-lock" onClick={props.onLogout}>Lock</button>
+      </header>
 
       <Show when={menuOpen()}>
-        <div class="side-menu" onClick={() => setMenuOpen(false)}>
-          <nav onClick={(e) => e.stopPropagation()}>
-            <h2>Menu</h2>
-            <button type="button" class="secondary" onClick={() => navigate("log")}>Log the moment</button>
-            <button type="button" class="secondary" onClick={() => navigate("history")}>History</button>
-            <button type="button" class="secondary" onClick={() => navigate("tags")}>Tag management</button>
-          </nav>
-        </div>
+        <div class="side-menu-backdrop" onClick={() => setMenuOpen(false)} />
+        <nav class="side-menu-panel">
+          <button type="button" class="secondary" onClick={() => navigate("log")}>Log the moment</button>
+          <button type="button" class="secondary" onClick={() => navigate("history")}>History</button>
+          <button type="button" class="secondary" onClick={() => navigate("tags")}>Tag management</button>
+        </nav>
       </Show>
 
       <main class="screen">{props.children}</main>
