@@ -29,6 +29,27 @@ Requirements are written in English. What the user types in the app may be any U
 
 Pattern and analytics screens, export, accounts and email, sharing logs, reminders.
 
+## Running locally
+
+Requirements: Go 1.22+, Node.js, PostgreSQL.
+
+```bash
+# database (example)
+sudo -u postgres createuser present --password
+sudo -u postgres createdb present -O present
+
+cd web && npm ci && npm run build
+cd ../server && go run ./cmd/server
+```
+
+Dev unlock key defaults to `present-demo` (`PRESENT_STATIC_KEY` overrides it).
+
+Optional public tunnel for phone testing:
+
+```bash
+./scripts/run-tunnel.sh
+```
+
 ## Remote
 
 Private GitHub repository: https://github.com/krp12345/Present
