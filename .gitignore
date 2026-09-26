@@ -3,6 +3,9 @@
 !.env.example
 *.pem
 *.key
+/pki/
 node_modules/
 web/dist/
 server/present-server
+__pycache__/
+*.pyc

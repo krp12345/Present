@@ -39,10 +39,30 @@ sudo -u postgres createuser present --password
 sudo -u postgres createdb present -O present
 
 cd web && npm ci && npm run build
-cd ../server && go run ./cmd/server
+cd .. && ./scripts/make-ca.py && ./scripts/issue-cert.py   # once, plus after the IP changes
+./scripts/run.sh
 ```
 
+The server is HTTPS only and listens on `:8443` by default (`PRESENT_ADDR`
+overrides it). It refuses to start without a certificate and key; the boot
+script prints the URLs the certificate is valid for.
+
 Dev unlock key defaults to `present-demo` (`PRESENT_STATIC_KEY` overrides it).
+
+## HTTPS certificates
+
+The browser reaches the server by IP over HTTPS, with a certificate from a
+private CA (`architecture/transport.md`). Two scripts do that; details in
+`scripts/pki/README.md`.
+
+```bash
+./scripts/make-ca.py --ask-passphrase   # once; then trust pki/ca.crt.pem on every client
+./scripts/issue-cert.py                # covers this host's DHCP address; re-run when it changes
+```
+
+The certificate covers the LAN address only. On Fedora Workstation the
+default firewall zone already allows inbound TCP above 1024, so reaching the
+server from another device on the home network needs no further setup.
 
 Optional public tunnel for phone testing:
 

@@ -2,14 +2,20 @@ package config
 
 import (
 	"os"
+	"path/filepath"
 	"time"
 )
 
 type Config struct {
-	Addr       string
+	Addr        string
 	DatabaseURL string
-	StaticKey  string
-	SessionTTL time.Duration
+	StaticKey   string
+	SessionTTL  time.Duration
+	// TLSCertFile and TLSKeyFile are required: the app is served over HTTPS
+	// only (architecture/transport.md). Both are produced by
+	// ./scripts/issue-cert.py.
+	TLSCertFile string
+	TLSKeyFile  string
 }
 
 func Load() Config {
@@ -29,12 +35,22 @@ func Load() Config {
 	}
 	addr := os.Getenv("PRESENT_ADDR")
 	if addr == "" {
-		addr = ":8080"
+		addr = ":8443"
+	}
+	certFile := os.Getenv("PRESENT_TLS_CERT")
+	if certFile == "" {
+		certFile = filepath.Join("..", "pki", "server.fullchain.pem")
+	}
+	keyFile := os.Getenv("PRESENT_TLS_KEY")
+	if keyFile == "" {
+		keyFile = filepath.Join("..", "pki", "server.key.pem")
 	}
 	return Config{
 		Addr:        addr,
 		DatabaseURL: db,
 		StaticKey:   key,
 		SessionTTL:  ttl,
+		TLSCertFile: certFile,
+		TLSKeyFile:  keyFile,
 	}
 }
