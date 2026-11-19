@@ -1,7 +1,10 @@
 # Deploys Present to Firebase (Hosting + Firestore rules and indexes).
 #
-# Runs on every push to main, and on demand from the Actions tab
-# ("Run workflow", any branch). Free on GitHub-hosted runners; Firebase stays
+# Runs only on demand from the Actions tab ("Run workflow"). Pushes do not
+# trigger it. To deploy on every push to main later, add under `on:`:
+#   push:
+#     branches: [main]
+# Free on GitHub-hosted runners; Firebase stays
 # on the free Spark plan because nothing here needs Blaze.
 #
 # One-time setup, all in GitHub (never in code or chat), see README.md:
@@ -11,8 +14,6 @@
 name: Deploy to Firebase
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 concurrency:

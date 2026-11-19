@@ -29,7 +29,7 @@ The Firebase Local Emulator Suite runs Hosting, Authentication and Firestore tog
 
 ## Deploy
 
-`.github/workflows/deploy.yml` deploys Hosting and the Firestore rules and indexes on every push to `main`, or on demand. `scripts/deploy.sh` does the same from a machine where `firebase login` has been run.
+`.github/workflows/deploy.yml` deploys Hosting and the Firestore rules and indexes when run by hand from the Actions tab; pushes do not trigger it. `scripts/deploy.sh` does the same from a machine where `firebase login` has been run.
 
 ## Testing (this phase)
 

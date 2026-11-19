@@ -46,7 +46,7 @@ Do not upgrade the Firebase project to Blaze; nothing here needs it.
 | `firestore.rules` | The server-side gate: only the owner, only within an hour of sign-in, and data limits |
 | `firestore.indexes.json` | Indexes for the history filters |
 | `firebase.json`, `.firebaserc` | Firebase project wiring |
-| `.github/workflows/deploy.yml` | Deploys on every push to `main` (or on demand) |
+| `.github/workflows/deploy.yml` | Deploys on demand only (Actions → Deploy to Firebase → Run workflow); pushes do not trigger it |
 | `scripts/deploy.sh` | The same deploy from your own machine, if ever needed |
 
 ## Running locally
@@ -91,7 +91,7 @@ Nothing in these steps is ever typed into a chat or committed.
 
 ### 3. Deploy
 
-Push to `main`, or **Actions → Deploy to Firebase → Run workflow**. When it is green, the app is at `https://<project-id>.web.app`.
+Go to **Actions → Deploy to Firebase → Run workflow** (pushes never deploy on their own). When it is green, the app is at `https://<project-id>.web.app`.
 
 ### 4. Make yourself the owner
 
