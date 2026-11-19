@@ -1,82 +1,57 @@
 # Login
 
-## Key entry is the only launch screen
+## Sign-in is the only launch screen
 
 Given the app has just been opened
+And nobody is signed in on this device
 When the first screen is shown
-Then the only action available is entering the key
+Then the only action available is signing in
 And nothing else about the rest of the app is shown
 
-## Correct key opens the app
+## The owner's account opens the app
 
-Given the key entry screen is shown
-And access is not blocked
-When the correct key is submitted
+Given the sign-in screen is shown
+When the owner signs in with their account
 Then the log-the-moment screen is shown
 
-## Empty or wrong key is denied with tries remaining
+## Any other account is denied
 
-Given the key entry screen is shown
-And access is not blocked
-When an empty key or a wrong key is submitted
+Given the sign-in screen is shown
+When someone signs in with an account that is not the owner's
 Then access is denied
-And how many tries remain is shown
+And no records or tags are shown
+And they can sign out to try another account
 
-## Empty and wrong key both count as attempts
+## A denied account cannot read or change anything
 
-Given the key entry screen is shown
-And no failed attempts have been made yet
-When an empty key is submitted
-And then a wrong key is submitted
-Then two attempts have been used
-And the remaining try count reflects both
+Given an account that is not the owner's is signed in
+When it tries to read or change records or tags by any means
+Then nothing is read and nothing is changed
 
-## Five failed attempts block further access
+## After one hour the user is returned to sign-in
 
-Given four failed unlock attempts have already been made
-When a fifth empty or wrong key is submitted
-Then access is denied
-And further unlock attempts are blocked until the block is explicitly cleared
-
-## Blocked user cannot open the app
-
-Given unlock attempts from this place are blocked
-When the correct key is submitted
-Then the app does not open
-
-## Successful unlock resets failed attempts
-
-Given some failed unlock attempts have been made
-And access is not yet blocked
-When the correct key is submitted
-Then the app opens
-And later failed attempts start from a full set of five tries again
-
-## After one hour the user is returned to key entry
-
-Given the app has been opened with a correct key
-When one hour has passed
-Then the key entry screen is shown
-And the user must enter the key again to continue
+Given the app has been opened by signing in
+When one hour has passed since that sign-in
+Then the sign-in screen is shown
+And the user must sign in again to continue
 
 ## Unfinished work is discarded when forced out
 
 Given the log-the-moment screen is shown
 And the user has typed a description or chosen tags that are not saved
-When one hour since unlock has passed
-Then the key entry screen is shown
+When one hour since sign-in has passed
+Then the sign-in screen is shown
 And those unsaved changes are gone
+
+## Lock returns to sign-in
+
+Given the app is open
+When the user chooses to lock it
+Then the sign-in screen is shown
 
 ## Phone and PC may be open at the same time
 
 Given the app is already open on one device
-When the correct key is submitted on a second device
+When the owner signs in on a second device
 Then the app opens on the second device
 And the first device remains open
-
-## Block lasts until it is explicitly cleared
-
-Given unlock attempts from this place are blocked
-When the app is later opened again after the server has been restarted
-Then access is still blocked
-And the block remains until it is explicitly cleared

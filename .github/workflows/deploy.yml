@@ -1,0 +1,61 @@
+# Deploys Present to Firebase (Hosting + Firestore rules and indexes).
+#
+# Runs on every push to main, and on demand from the Actions tab
+# ("Run workflow", any branch). Free on GitHub-hosted runners; Firebase stays
+# on the free Spark plan because nothing here needs Blaze.
+#
+# One-time setup, all in GitHub (never in code or chat), see README.md:
+#   Settings > Secrets and variables > Actions
+#     Secret   FIREBASE_SERVICE_ACCOUNT  the deploy service account's JSON key
+#     Variable FIREBASE_PROJECT_ID       the Firebase project id
+name: Deploy to Firebase
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: firebase-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      HAS_CREDENTIALS: ${{ secrets.FIREBASE_SERVICE_ACCOUNT != '' && vars.FIREBASE_PROJECT_ID != '' }}
+    steps:
+      - name: Check setup
+        if: env.HAS_CREDENTIALS != 'true'
+        run: |
+          echo "::warning::Deploy skipped: set the FIREBASE_SERVICE_ACCOUNT secret and the FIREBASE_PROJECT_ID variable (see README.md)."
+
+      - uses: actions/checkout@v4
+        if: env.HAS_CREDENTIALS == 'true'
+
+      - uses: actions/setup-node@v4
+        if: env.HAS_CREDENTIALS == 'true'
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            web/package-lock.json
+
+      - name: Install
+        if: env.HAS_CREDENTIALS == 'true'
+        run: npm ci
+
+      - name: Authenticate to Google Cloud
+        if: env.HAS_CREDENTIALS == 'true'
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Deploy
+        if: env.HAS_CREDENTIALS == 'true'
+        # firebase.json's predeploy step builds the web app.
+        run: npx firebase deploy --only hosting,firestore --project "${{ vars.FIREBASE_PROJECT_ID }}" --non-interactive --force

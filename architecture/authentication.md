@@ -1,34 +1,19 @@
 # Authentication
 
-## Static key
+## Sign in with Google
 
-One configured secret for all devices. It is username and password combined. It does not expire. Changing it is a server configuration concern, not an in-app flow.
+The app is unlocked by signing in with a Google account through Firebase Authentication. There is no key or password of the app's own, so there is nothing to guess or brute-force: repeated attempts are a matter for Google's own account protection.
 
-There is no username field.
+Only one account may use the app: the one whose Firebase user ID has a document in the Firestore `owners` collection. The operator adds that document by hand in the Firebase console. Any other account that signs in is shown "Access denied" (with its user ID, so the owner can register themselves the first time) and can read or write nothing; the Firestore security rules enforce this on every request.
 
-Unlock: the client sends the static key in an HTTPS request header. Missing and incorrect values are the same class of failure: unauthorized, and they increment the failure count. Keys are not sent over HTTP (clients are only served HTTPS; see `transport.md`).
+## Session
 
+A session lasts one hour from sign-in. Firebase refreshes its ID token in the background, but the token keeps the original sign-in time (`auth_time`), and the security rules refuse every request once that is more than one hour ago. The client also returns to the sign-in screen at that moment; anything not saved is discarded. Signing in again starts a new hour.
 
-## Temporary key
+Each device signs in on its own, so the PC and the phone may be open at the same time.
 
-On success, the server returns a unique temporary key. Later HTTPS requests send that temporary key in a header. The server rejects work if it is missing, wrong, or older than one hour.
+"Lock" signs out on that device.
 
-Lifetime is one hour from issue. When it expires, the client is treated as logged out. Anything not saved is discarded. The user must unlock again with the static key.
+## What changed from the static-key design
 
-Each successful unlock may issue its own temporary key so two devices can work at once.
-
-## Failure counting and lockout
-
-Failures are counted per client identity suitable for lockout (IP, and another unique id if IP is not enough). Behind Firebase Hosting the client IP is taken from the first `X-Forwarded-For` entry; the other part is a per-browser id the client sends in a header. Empty key and wrong key both count, so a client cannot keep hitting the server without using up tries.
-
-Five failures are allowed. A further failure while already at five leaves the identity blocked.
-
-A successful unlock resets that identity’s failure count.
-
-A blocked identity stays blocked across process restart. Clearing a block in this slice is a manual change in the persistent store by the operator, not an in-app action and not a side effect of restart.
-
-## Visible unlock behaviour
-
-Failed unlock: generic denial plus how many tries remain.
-
-Blocked: cannot open the app, including with the correct static key, until the operator clears the block.
+The first design used a static key, a count of five failed tries, and a block that lasted until the operator cleared it. Enforcing a failure count needs server code, which the free Firebase plan does not run. Google sign-in restricted to the owner's account removes the guessable secret altogether, so the count and the block are no longer needed.

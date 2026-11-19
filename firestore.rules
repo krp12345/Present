@@ -1,12 +1,85 @@
 rules_version = '2';
 
-// The browser never talks to Firestore. All reads and writes go through the
-// `api` Cloud Function, which uses the Admin SDK and is not bound by these
-// rules. Everything else is denied.
+// Present has no server of its own: the browser reads and writes Firestore
+// directly, and these rules are the server-side gate. Only the owner may read
+// or write, and only within one hour of signing in.
+//
+// The owner is registered by hand in the Firebase console: a document in the
+// `owners` collection whose ID is the owner's Firebase Auth UID. Clients
+// cannot create, change or list owners.
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // A session lasts one hour from sign-in (architecture/authentication.md).
+    // Token refreshes keep auth_time, so only a fresh sign-in extends it.
+    function fresh() {
+      return request.time < timestamp.value(request.auth.token.auth_time * 1000) + duration.value(1, 'h');
+    }
+
+    function isOwner() {
+      return signedIn()
+        && fresh()
+        && exists(/databases/$(database)/documents/owners/$(request.auth.uid));
+    }
+
+    match /owners/{uid} {
+      // Lets the app tell "not your account" apart from other failures.
+      allow get: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Length limits: the app enforces the exact limits in Unicode characters
+    // (200 per tag name, 1000 per description). Rules measure strings in
+    // UTF-16 units, where an emoji counts as two, so the bounds here are twice
+    // those numbers: never stricter than the app, still a hard cap.
+
+    function validTag(d) {
+      return d.keys().hasOnly(['name', 'deleted', 'createdAt'])
+        && d.name is string && d.name.size() > 0 && d.name.size() <= 400
+        && d.deleted is bool;
+    }
+
+    match /tags/{id} {
+      allow read: if isOwner();
+      allow create: if isOwner() && validTag(request.resource.data) && request.resource.data.deleted == false;
+      allow update: if isOwner() && validTag(request.resource.data);
+      // Tags are soft-deleted only.
+    }
+
+    // One entry per tag name (keyed by a hash of the name), so names stay unique.
+    match /tagNames/{key} {
+      allow read, delete: if isOwner();
+      allow create, update: if isOwner()
+        && request.resource.data.keys().hasOnly(['tagId'])
+        && request.resource.data.tagId is string;
+    }
+
+    function validRecord(d) {
+      return d.keys().hasOnly(['description', 'momentAt', 'deleted', 'version', 'tagIds', 'createdAt', 'updatedAt'])
+        && d.description is string && d.description.size() <= 2000
+        // Not in the future; a few minutes of slack for a phone clock that runs fast.
+        && d.momentAt is timestamp && d.momentAt <= request.time + duration.value(5, 'm')
+        && d.tagIds is list && d.tagIds.size() >= 1 && d.tagIds.size() <= 200
+        && d.deleted is bool
+        && d.version is int;
+    }
+
+    match /records/{id} {
+      allow read: if isOwner();
+      allow create: if isOwner()
+        && validRecord(request.resource.data)
+        && request.resource.data.version == 1
+        && request.resource.data.deleted == false;
+      // Optimistic locking: every change advances the version by exactly one,
+      // and a soft-deleted record cannot be changed again.
+      allow update: if isOwner()
+        && validRecord(request.resource.data)
+        && resource.data.deleted == false
+        && request.resource.data.version == resource.data.version + 1;
+      // Records are soft-deleted only.
     }
   }
 }

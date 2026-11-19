@@ -6,11 +6,11 @@ This repository is the product, its documentation, and a runnable first implemen
 
 ## Who it is for
 
-One person. The app is used from a web browser on the home PC and on a personal phone, at home or away. It is hosted on Firebase and reached over HTTPS at the project's Firebase Hosting address (see `architecture/reachability.md`).
+One person. The app is used from a web browser on the home PC and on a personal phone, at home or away. It is hosted on Firebase's free plan and reached over HTTPS at the project's Firebase Hosting address (see `architecture/reachability.md`).
 
 ## What this first slice does
 
-After unlock, write what is happening (optional), attach at least one tag, and save. Browse, filter, edit, and hide past records. Manage tags.
+After signing in with Google, write what is happening (optional), attach at least one tag, and save. Browse, filter, edit, and hide past records. Manage tags.
 
 ## Documentation
 
@@ -27,90 +27,86 @@ Requirements are written in English. What the user types in the app may be any U
 
 ## Out of this first slice
 
-Pattern and analytics screens, export, accounts and email, sharing logs, reminders.
+Pattern and analytics screens, export, sharing logs, reminders.
+
+## Cost
+
+Everything runs on free tiers and **no card is needed anywhere**:
+
+- **Firebase Spark (free) plan:** Hosting, Authentication and Firestore. A Spark project has no billing account, so it cannot be charged; past the daily free quota (for example 50,000 Firestore reads a day) requests are refused until the next day instead.
+- **GitHub Actions:** free for this public repository.
+
+Do not upgrade the Firebase project to Blaze; nothing here needs it.
 
 ## Layout
 
 | Path | What it is |
 | --- | --- |
-| `web/` | SolidJS single-page app, served by **Firebase Hosting** |
-| `functions/` | The JSON API (`/api/*`) as one **Cloud Function for Firebase** (TypeScript) |
-| `firestore.rules`, `firestore.indexes.json` | **Firestore** security rules (deny all client access) and indexes |
-| `firebase.json`, `.firebaserc` | Firebase project wiring: Hosting rewrites `/api/**` to the function |
-| `scripts/deploy.sh` | One-command build and deploy |
+| `web/` | SolidJS single-page app. Talks to Firestore directly with the Firebase web SDK. |
+| `firestore.rules` | The server-side gate: only the owner, only within an hour of sign-in, and data limits |
+| `firestore.indexes.json` | Indexes for the history filters |
+| `firebase.json`, `.firebaserc` | Firebase project wiring |
+| `.github/workflows/deploy.yml` | Deploys on every push to `main` (or on demand) |
+| `scripts/deploy.sh` | The same deploy from your own machine, if ever needed |
 
 ## Running locally
 
 Requirements: Node.js 22, Java 11+ (for the Firestore emulator).
 
 ```bash
-npm run setup                                              # install all dependencies
-echo 'PRESENT_STATIC_KEY=present-demo' > functions/.secret.local   # local unlock key (git-ignored)
-npm run emulators                                          # builds, then runs Hosting + Functions + Firestore
+npm run setup       # install dependencies
+npm run emulators   # builds, then runs Hosting + Authentication + Firestore locally
 ```
 
-Open http://127.0.0.1:5000 and unlock with `present-demo`. The emulator UI at
-http://127.0.0.1:4000 shows the Firestore data. Emulator data is kept in
-`.emulator-data/` between runs.
+Open http://127.0.0.1:5000 and press **Sign in with Google**. The Auth
+emulator shows a fake account picker: add any test account. The app then
+shows "Access denied" with that account's ID. Open the emulator UI at
+http://127.0.0.1:4000 → Firestore, create the collection `owners` with a
+document whose ID is that value (no fields needed), and reload. Emulator data
+is kept in `.emulator-data/` between runs.
 
-For hot reload of the web app, keep the emulators running and in another
-terminal run `npm run dev:web` (http://localhost:5173, proxies `/api` to the
-emulators). After changing `functions/src`, run `npm --prefix functions run build`
-(or `build:watch`); the emulator reloads the function.
+For hot reload, keep the emulators running and in another terminal run
+`npm run dev:web` (http://localhost:5173).
 
-Starter tags (optional):
+## Putting it on Firebase (one time, about 15 minutes, no card)
 
-```bash
-FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 GCLOUD_PROJECT=demo-present npm --prefix functions run seed
-```
+Nothing in these steps is ever typed into a chat or committed.
 
-## Deploying to Firebase
+### 1. Create the Firebase project
 
-### One-time setup
+1. Go to https://console.firebase.google.com → **Create a project**. Any name. Google Analytics is not needed. It is created on the free Spark plan.
+2. **Build → Firestore Database → Create database** → *Standard edition*, location **asia-south1 (Mumbai)**, start in **production mode**. The location cannot be changed later.
+3. **Build → Authentication → Get started → Sign-in method → Google → Enable**, pick your support email, **Save**.
+4. **Project settings (gear) → General → Your apps → Web (`</>`)**: register a web app (any nickname). Tick **Also set up Firebase Hosting**. Skip the SDK snippet; the app loads its config from Hosting by itself.
+5. Note the **Project ID** shown in Project settings.
 
-1. Create a project at https://console.firebase.google.com (or use an existing one).
-2. Upgrade it to the **Blaze** (pay-as-you-go) plan. Cloud Functions and
-   Secret Manager need it. A single-person app like this normally stays
-   inside the free quotas; setting a budget alert in Google Cloud Billing is
-   a good idea.
-3. In the console, create a **Firestore** database (Native mode). Pick a
-   location close to you; it cannot be changed later.
-4. Put the project id in `.firebaserc` (replace `your-firebase-project-id`).
-5. Log in and install:
-   ```bash
-   npm run setup
-   npx firebase login
-   ```
-6. Set the unlock key (stored in Cloud Secret Manager, never in the repository):
-   ```bash
-   npx firebase functions:secrets:set PRESENT_STATIC_KEY
-   ```
+### 2. Give GitHub permission to deploy
 
-### Every deploy
+1. Open https://console.cloud.google.com/iam-admin/serviceaccounts and pick the same project.
+2. **Create service account**, name `github-deploy`. Grant it the roles **Firebase Admin** and **Service Usage Consumer**. Done.
+3. Open the new account → **Keys → Add key → Create new key → JSON**. A file downloads.
+4. In GitHub: **this repository → Settings → Secrets and variables → Actions**:
+   - **Secrets → New repository secret**: name `FIREBASE_SERVICE_ACCOUNT`, value: the whole content of the downloaded JSON file. Then delete the file from your computer.
+   - **Variables → New repository variable**: name `FIREBASE_PROJECT_ID`, value: your project ID.
 
-```bash
-./scripts/deploy.sh
-```
+### 3. Deploy
 
-This deploys Firestore rules and indexes, the `api` function, and the built
-web app. The app is then live at `https://<project-id>.web.app` (and
-`https://<project-id>.firebaseapp.com`). The first deploy can take a few
-minutes while Google enables the APIs and builds the indexes.
+Push to `main`, or **Actions → Deploy to Firebase → Run workflow**. When it is green, the app is at `https://<project-id>.web.app`.
 
-Optional starter tags in production (uses your Google login):
+### 4. Make yourself the owner
 
-```bash
-gcloud auth application-default login
-GCLOUD_PROJECT=<project-id> npm --prefix functions run seed
-```
+1. Open the app and **Sign in with Google**. The first time it says *Access denied* and shows your account ID.
+2. In the Firebase console → **Firestore Database → Start collection**: collection ID `owners`, document ID: that account ID, add any field (for example `note` = `me`), **Save**.
+3. Reload the app. You are in.
 
-### Operating it
+Any other Google account that signs in only ever sees *Access denied*.
 
-- **Change the unlock key:** run `firebase functions:secrets:set PRESENT_STATIC_KEY` again, then `./scripts/deploy.sh` (the function picks up the new version on deploy).
-- **Clear a lockout:** in the Firebase console → Firestore → `lockouts`, find the document whose `identity` field matches and set `blocked` to `false` and `failures` to `0` (or delete it).
-- **Region:** the function runs in `us-central1`. To move it, change `region` in both `functions/src/index.ts` and the `/api/**` rewrite in `firebase.json`.
-- **Expired sessions** are removed by Firestore's TTL policy on `sessions.expiresAt` (deployed from `firestore.indexes.json`); deletion can lag up to a day, but expired keys are refused immediately regardless.
+## Operating it
+
+- **Revoke GitHub's deploy access:** delete the key (or the whole `github-deploy` service account) in Google Cloud, and the `FIREBASE_SERVICE_ACCOUNT` secret in GitHub.
+- **Add or remove a device:** nothing to do; sign in with the same Google account anywhere. To stop someone, remove their document from `owners` (only yours should be there).
+- **Moving the database region** is not possible; create a new project instead.
 
 ## Remote
 
-Private GitHub repository: https://github.com/krp12345/Present
+GitHub repository (public): https://github.com/krp12345/Present

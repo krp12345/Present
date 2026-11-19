@@ -1,12 +1,10 @@
 import { Show, createSignal } from "solid-js";
-import { api } from "../api/client";
+import { signIn, signOut } from "../api/firebase";
 
-type Props = { onSuccess: () => void };
+type Props = { notAllowed?: { uid: string; email: string | null } };
 
 export default function Login(props: Props) {
-  const [key, setKey] = createSignal("");
   const [error, setError] = createSignal("");
-  const [tries, setTries] = createSignal<number | null>(null);
   const [loading, setLoading] = createSignal(false);
 
   const submit = async (e: Event) => {
@@ -14,18 +12,9 @@ export default function Login(props: Props) {
     setLoading(true);
     setError("");
     try {
-      await api.unlock(key());
-      props.onSuccess();
+      await signIn();
     } catch (err: any) {
-      if (err.status === 403) {
-        setError("Access blocked. Contact the operator to clear the block.");
-        setTries(0);
-      } else if (err.body?.triesRemaining != null) {
-        setTries(err.body.triesRemaining);
-        setError("Access denied.");
-      } else {
-        setError(err.message || "Access denied.");
-      }
+      setError(err?.message || "Sign-in failed.");
     } finally {
       setLoading(false);
     }
@@ -33,24 +22,32 @@ export default function Login(props: Props) {
 
   return (
     <div class="login-screen">
-      <form class="login-card" onSubmit={submit}>
-        <h1>Present</h1>
-        <p class="muted">Enter your key to continue.</p>
-        <input
-          type="password"
-          placeholder="Key"
-          value={key()}
-          onInput={(e) => setKey(e.currentTarget.value)}
-          autocomplete="current-password"
-        />
-        <button type="submit" disabled={loading()}>{loading() ? "Unlocking…" : "Unlock"}</button>
-        <Show when={error()}>
-          <p class="error">{error()}</p>
-          <Show when={tries() != null && tries()! > 0}>
-            <p class="muted">{tries()} tries remaining</p>
-          </Show>
-        </Show>
-      </form>
+      <Show
+        when={props.notAllowed}
+        fallback={
+          <form class="login-card" onSubmit={submit}>
+            <h1>Present</h1>
+            <p class="muted">Sign in to continue.</p>
+            <button type="submit" disabled={loading()}>{loading() ? "Signing in…" : "Sign in with Google"}</button>
+            <Show when={error()}>
+              <p class="error">{error()}</p>
+            </Show>
+          </form>
+        }
+      >
+        {(who) => (
+          <div class="login-card">
+            <h1>Present</h1>
+            <p class="error">Access denied.</p>
+            <p class="muted">
+              {who().email ?? "This account"} is not allowed to open this app. If this is your account,
+              add a document with this ID to the <code>owners</code> collection in the Firebase console:
+            </p>
+            <p><code class="uid">{who().uid}</code></p>
+            <button type="button" class="secondary" onClick={() => signOut()}>Use another account</button>
+          </div>
+        )}
+      </Show>
     </div>
   );
 }

@@ -1,13 +1,13 @@
 {
   "name": "present",
   "private": true,
-  "description": "Present on Firebase: Hosting (web/) + Cloud Functions (functions/) + Firestore.",
+  "description": "Present on Firebase (free Spark plan): Hosting + Authentication + Firestore.",
   "scripts": {
-    "setup": "npm ci && npm --prefix web ci && npm --prefix functions ci",
-    "build": "npm --prefix web run build && npm --prefix functions run build",
-    "emulators": "npm run build && firebase emulators:start --import=.emulator-data --export-on-exit",
+    "setup": "npm ci && npm --prefix web ci",
+    "build": "npm --prefix web run build",
+    "emulators": "npm run build && firebase emulators:start --project demo-present --import=.emulator-data --export-on-exit",
     "dev:web": "npm --prefix web run dev",
-    "deploy": "firebase deploy --only hosting,functions,firestore"
+    "deploy": "firebase deploy --only hosting,firestore"
   },
   "devDependencies": {
     "firebase-tools": "^15.0.0"

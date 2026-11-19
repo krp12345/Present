@@ -1,32 +1,35 @@
 # Implementation stack
 
-Technology choices for building Present. Infrastructure decisions (Firestore, reachability, certificates, secret storage) are in the other architecture files.
-
-## Server
-
-- **Runtime:** Cloud Functions for Firebase (2nd gen), Node.js 22, TypeScript
-- **HTTP:** one `onRequest` function, `api`, with a small hand-written router — no web framework
-- **Database access:** Firebase Admin SDK for Firestore; multi-document changes run in Firestore transactions
-
-The function serves the JSON API under `/api/`. Firebase Hosting serves the built SPA static assets and rewrites `/api/**` to the function, so both share one origin.
+Technology choices for building Present. Infrastructure decisions (Firestore, reachability, certificates, identity) are in the other architecture files.
 
 ## Client
 
 - **UI:** single-page application (SPA)
 - **Framework:** SolidJS
-- The browser talks to the API over HTTPS on the same origin (or via the Vite dev proxy to the Firebase emulators during local work).
+- **Data and sign-in:** Firebase web SDK (`firebase/auth`, `firebase/firestore`). Multi-document changes (tag create/rename with the name index, record save with its version check) run in Firestore transactions.
+- The Firebase web config is not in the repository; the app fetches it from Firebase Hosting at `/__/firebase/init.json`.
+
+## Server side
+
+There is no server process and no Cloud Function: those need the paid Blaze plan. The only server-side logic is `firestore.rules`, which Google evaluates on every read and write.
 
 ## Shape
 
 ```
-SolidJS SPA --HTTPS/JSON--> Firebase Hosting --rewrite /api/**--> Cloud Function `api` --Admin SDK--> Firestore
-                                                                        |
-                                                          Secret Manager (static key)
+SolidJS SPA --HTTPS--> Firebase Hosting (static files + config)
+     |
+     +--Google sign-in--> Firebase Authentication
+     |
+     +--ID token--> Firestore --> security rules (owner, 1 hour, limits, versions)
 ```
 
 ## Local work
 
-The Firebase Local Emulator Suite runs Hosting, Functions and Firestore together, with the same rewrites as production. The local static key comes from `functions/.secret.local` (git-ignored).
+The Firebase Local Emulator Suite runs Hosting, Authentication and Firestore together. On `localhost` the app connects to the emulators automatically.
+
+## Deploy
+
+`.github/workflows/deploy.yml` deploys Hosting and the Firestore rules and indexes on every push to `main`, or on demand. `scripts/deploy.sh` does the same from a machine where `firebase login` has been run.
 
 ## Testing (this phase)
 

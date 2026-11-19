@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Deploy Present to Firebase: Firestore rules + indexes, the `api` Cloud
-# Function, and the web app on Hosting. Builds both before deploying.
+# Deploy Present to Firebase: Firestore rules + indexes and the web app on
+# Hosting. Builds the web app first.
 #
 #   ./scripts/deploy.sh                 # uses the project in .firebaserc
 #   ./scripts/deploy.sh my-project-id   # or name it explicitly
@@ -20,4 +20,4 @@ elif grep -q '"your-firebase-project-id"' .firebaserc; then
 fi
 
 [[ -d node_modules ]] || npm ci
-npx firebase deploy --only firestore,functions,hosting "${project_args[@]}"
+npx firebase deploy --only hosting,firestore "${project_args[@]}"

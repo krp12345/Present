@@ -8,7 +8,7 @@ The home PC and the personal phone reach the app at the project's Firebase Hosti
 
 ## Office
 
-Away from home, the only client is still the **personal phone**, on **personal mobile data**. Office Wi‑Fi, office LAN, and office-owned or office-managed devices are not used and are not a target. This is a usage rule; the address itself is reachable from any network.
+Away from home, the only client is still the **personal phone**, on **personal mobile data**. Office Wi‑Fi, office LAN, and office-owned or office-managed devices are not used and are not a target. This is a usage rule; the address itself is reachable from any network, and only the owner's Google account can get in.
 
 ## Transport
 
