@@ -7,11 +7,10 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5173,
     proxy: {
-      // The API is served by the Go process over HTTPS on 8443, from the same
-      // origin as the built app. Its certificate comes from the private CA in
-      // ./pki, which this proxy has no reason to know about, so skip the check
-      // on the loopback hop.
-      "/api": { target: "https://localhost:8443", secure: false },
+      // The API is the `api` Cloud Function. During local work it is served
+      // by the Firebase emulators (npm run emulators), whose Hosting emulator
+      // applies the same /api/** rewrite as production.
+      "/api": { target: "http://127.0.0.1:5000" },
     },
   },
   build: {

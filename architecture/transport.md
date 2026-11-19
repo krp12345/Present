@@ -2,18 +2,16 @@
 
 All client–server communication is **HTTPS**. The key in the header, the temporary key, pages, and data all travel on HTTPS. There is no parallel HTTP API or HTTP UI.
 
-HTTP is not served. A client that speaks HTTP does not get a redirect and does not get the app.
-
-This applies on the home network and when the personal phone is away from home on personal mobile data. Reachability is by IP address (LAN or public); HTTPS is still required. Details: `reachability.md`.
-
-Office Wi‑Fi and office devices are not clients.
+Firebase Hosting serves only HTTPS to clients: a plain HTTP request is redirected to HTTPS, and every response carries `Strict-Transport-Security`, so a browser that has visited once will not use HTTP again. The hop from Hosting to the Cloud Function stays inside Google's network over HTTPS.
 
 ## Certificates
 
-HTTPS uses a certificate issued by a **private CA** operated by the operator. A paid public domain is out of scope, so a public web CA is not used.
-
-The operator runs the CA and issues a server certificate for the home machine. The CA root certificate is installed and trusted on the home PC and on the personal phone. Because access is by IP address rather than a domain name, the server certificate must be valid for the addresses in use (LAN IP, public IP, or both, depending on how the operator configures it).
+Firebase Hosting provisions and renews the certificate for the project's `web.app` and `firebaseapp.com` domains (and for any custom domain added later). No private CA and no certificate installation on client devices is needed.
 
 ## Secrets on the wire
 
-The static key and the temporary key are only sent as HTTPS headers. They must not be placed on a query string or in an HTTP (clear-text) request.
+The static key and the temporary key are only sent as HTTPS headers. They must not be placed on a query string.
+
+## Caching
+
+API responses are sent with `Cache-Control: no-store`, so neither the Hosting CDN nor the browser keeps personal data or keys. Built assets under `/assets/` have content-hashed names and are cached long-term; `index.html` is revalidated on each load so a deploy takes effect immediately.

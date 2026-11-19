@@ -6,7 +6,7 @@ One configured secret for all devices. It is username and password combined. It 
 
 There is no username field.
 
-Unlock: the client sends the static key in an HTTPS request header. Missing and incorrect values are the same class of failure: unauthorized, and they increment the failure count. Keys are not sent over HTTP (HTTP is not served).
+Unlock: the client sends the static key in an HTTPS request header. Missing and incorrect values are the same class of failure: unauthorized, and they increment the failure count. Keys are not sent over HTTP (clients are only served HTTPS; see `transport.md`).
 
 
 ## Temporary key
@@ -19,7 +19,7 @@ Each successful unlock may issue its own temporary key so two devices can work a
 
 ## Failure counting and lockout
 
-Failures are counted per client identity suitable for lockout (IP, and another unique id if IP is not enough). Empty key and wrong key both count, so a client cannot keep hitting the server without using up tries.
+Failures are counted per client identity suitable for lockout (IP, and another unique id if IP is not enough). Behind Firebase Hosting the client IP is taken from the first `X-Forwarded-For` entry; the other part is a per-browser id the client sends in a header. Empty key and wrong key both count, so a client cannot keep hitting the server without using up tries.
 
 Five failures are allowed. A further failure while already at five leaves the identity blocked.
 

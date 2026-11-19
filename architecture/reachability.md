@@ -1,21 +1,15 @@
 # Reachability
 
-The server process runs on the home machine.
+The app is hosted on Firebase. There is no home server.
 
-## Home
+## Address
 
-The home PC and the personal phone on home Wi‑Fi reach the app via the machine’s **LAN IP address** and the port the server listens on, over HTTPS.
+The home PC and the personal phone reach the app at the project's Firebase Hosting address, `https://<project-id>.web.app` (also `https://<project-id>.firebaseapp.com`). The address does not change, so there is no IP to track, no port forwarding and no VPN or tunnel. A custom domain can be added in the Firebase console later; it is not needed.
 
 ## Office
 
-Away from home, the only client is the **personal phone**, on **personal mobile data**. Office Wi‑Fi, office LAN, and office-owned or office-managed devices are not used and are not a target.
-
-That phone reaches the same home process over HTTPS using the home machine’s **public IP address** and the same port. A paid domain is not used. There is no VPN or tunnel in this slice.
-
-The public IP may change. The operator is responsible for knowing the current address — for example by asking someone at home to run a command that prints the full URL and sharing it (such as via WhatsApp), or by noting the public IP in a private note on the phone when at home. Home router port forwarding (or equivalent) must expose the server port to the internet.
+Away from home, the only client is still the **personal phone**, on **personal mobile data**. Office Wi‑Fi, office LAN, and office-owned or office-managed devices are not used and are not a target. This is a usage rule; the address itself is reachable from any network.
 
 ## Transport
 
-The browser always uses HTTPS, on the LAN and from the office. HTTP is not served. Details: `transport.md`.
-
-Direct IP access still uses HTTPS with a certificate from the operator’s private CA. A paid domain is not required.
+The browser always uses HTTPS. Details: `transport.md`.

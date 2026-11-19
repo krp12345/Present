@@ -1,0 +1,15 @@
+{
+  "name": "present",
+  "private": true,
+  "description": "Present on Firebase: Hosting (web/) + Cloud Functions (functions/) + Firestore.",
+  "scripts": {
+    "setup": "npm ci && npm --prefix web ci && npm --prefix functions ci",
+    "build": "npm --prefix web run build && npm --prefix functions run build",
+    "emulators": "npm run build && firebase emulators:start --import=.emulator-data --export-on-exit",
+    "dev:web": "npm --prefix web run dev",
+    "deploy": "firebase deploy --only hosting,functions,firestore"
+  },
+  "devDependencies": {
+    "firebase-tools": "^15.0.0"
+  }
+}
