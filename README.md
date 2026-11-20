@@ -34,7 +34,6 @@ Pattern and analytics screens, export, sharing logs, reminders.
 Everything runs on free tiers and **no card is needed anywhere**:
 
 - **Firebase Spark (free) plan:** Hosting, Authentication and Firestore. A Spark project has no billing account, so it cannot be charged; past the daily free quota (for example 50,000 Firestore reads a day) requests are refused until the next day instead.
-- **GitHub Actions:** free for this public repository.
 
 Do not upgrade the Firebase project to Blaze; nothing here needs it.
 
@@ -46,8 +45,7 @@ Do not upgrade the Firebase project to Blaze; nothing here needs it.
 | `firestore.rules` | The server-side gate: only the owner, only within an hour of sign-in, and data limits |
 | `firestore.indexes.json` | Indexes for the history filters |
 | `firebase.json`, `.firebaserc` | Firebase project wiring |
-| `.github/workflows/deploy.yml` | Deploys on demand only (Actions → Deploy to Firebase → Run workflow); pushes do not trigger it |
-| `scripts/deploy.sh` | The same deploy from your own machine, if ever needed |
+| `scripts/deploy.sh` | Builds and deploys from your own PC. The only way the app is deployed; nothing in GitHub deploys |
 
 ## Running locally
 
@@ -75,24 +73,37 @@ Nothing in these steps is ever typed into a chat or committed.
 ### 1. Create the Firebase project
 
 1. Go to https://console.firebase.google.com → **Create a project**. Any name. Google Analytics is not needed. It is created on the free Spark plan.
-2. **Build → Firestore Database → Create database** → *Standard edition*, location **asia-south1 (Mumbai)**, start in **production mode**. The location cannot be changed later.
-3. **Build → Authentication → Get started → Sign-in method → Google → Enable**, pick your support email, **Save**.
-4. **Project settings (gear) → General → Your apps → Web (`</>`)**: register a web app (any nickname). Tick **Also set up Firebase Hosting**. Skip the SDK snippet; the app loads its config from Hosting by itself.
+2. **Firestore** (https://console.firebase.google.com/project/_/firestore) → **Create database** → *Standard edition*, location **asia-south1 (Mumbai)**, start in **production mode**. The location cannot be changed later.
+3. **Authentication** (https://console.firebase.google.com/project/_/authentication) → **Get started → Sign-in method → Google → Enable**, pick your support email, **Save**.
+4. **Project settings** (https://console.firebase.google.com/project/_/settings/general) → **Your apps → Web (`</>`)**: register a web app (any nickname). Tick **Also set up Firebase Hosting**. Skip the SDK snippet; the app loads its config from Hosting by itself.
 5. Note the **Project ID** shown in Project settings.
 
-### 2. Give GitHub permission to deploy (keyless)
+The menu layout of the console changes over time; the links above (where `_` lets you pick the project) always work. The project also appears in the Google Cloud console: it is the same project. Never accept a Cloud "free trial", "activate billing" or Blaze upgrade offer; that is what asks for a card.
 
-Follow **`docs/deploy-setup.md`**: paste one script into Google Cloud Shell
-(free), then add the three repository **variables** it prints under GitHub →
-Settings → Secrets and variables → Actions → Variables. No key is created or
-stored anywhere; Google trusts only this repository's `main` branch, and each
-deploy's credential expires within the hour.
+### 2. Deploy from your PC
 
-### 3. Deploy
+Deploying is always a manual step on your own computer. Pushing to GitHub
+never deploys anything.
 
-Go to **Actions → Deploy to Firebase → Run workflow** (pushes never deploy on their own). When it is green, the app is at `https://<project-id>.web.app`.
+Needs Node.js 22 and a copy of this repository on the PC.
 
-### 4. Make yourself the owner
+```bash
+npm run setup                          # once, and after dependency changes
+npx firebase login                     # once per PC: opens Google sign-in in your browser
+./scripts/deploy.sh <your-project-id>  # every deploy
+```
+
+The deploy builds the web app, then uploads it with the Firestore rules and
+indexes. When it finishes, the app is at `https://<project-id>.web.app`.
+
+To avoid typing the project id each time, put it in `.firebaserc` on your PC
+in place of `your-firebase-project-id` (it is not a secret) and run
+`./scripts/deploy.sh` alone. On Windows without bash, run
+`npx firebase deploy --only hosting,firestore --project <your-project-id>`.
+
+The Firebase login stays on your PC only. `npx firebase logout` removes it.
+
+### 3. Make yourself the owner
 
 1. Open the app and **Sign in with Google**. The first time it says *Access denied* and shows your account ID.
 2. In the Firebase console → **Firestore Database → Start collection**: collection ID `owners`, document ID: that account ID, add any field (for example `note` = `me`), **Save**.
@@ -102,7 +113,7 @@ Any other Google account that signs in only ever sees *Access denied*.
 
 ## Operating it
 
-- **Revoke GitHub's deploy access:** disable the `github` pool under IAM & Admin → Workload Identity Federation, or delete the `github-deploy` service account (see `docs/deploy-setup.md`).
+- **Deploy access** exists only where you ran `npx firebase login`. Run `npx firebase logout` there, or remove the sign-in under https://myaccount.google.com/permissions ("Firebase CLI"), to revoke it.
 - **Add or remove a device:** nothing to do; sign in with the same Google account anywhere. To stop someone, remove their document from `owners` (only yours should be there).
 - **Moving the database region** is not possible; create a new project instead.
 

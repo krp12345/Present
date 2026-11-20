@@ -32,7 +32,7 @@ Modules the UI exposes after sign-in: log the moment (default), history, tag man
 - **Persistent store:** Cloud Firestore, location `asia-south1` (Mumbai). Details: `data.md`.
 - **Reachability:** the project's Firebase Hosting domain (`<project-id>.web.app`), from anywhere. Details: `reachability.md`.
 - **HTTPS certificates:** managed by Firebase Hosting. Details: `transport.md`.
-- **Deploy:** GitHub Actions, keyless via Workload Identity Federation: Google trusts only this repository's `main` branch and issues a credential that expires within the hour. No key is stored. Details: `docs/deploy-setup.md`.
+- **Deploy:** manual only, from the operator's own PC with the Firebase CLI (`scripts/deploy.sh`) after `firebase login`. Nothing in GitHub deploys; there is no CI credential.
 - **Cost:** no billing account, no card. Free quotas only; over quota, requests are refused rather than charged.
 
 ## Implementation stack

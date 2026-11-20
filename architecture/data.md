@@ -38,4 +38,4 @@ The app checks limits in Unicode characters (an emoji is one). Security rules ca
 
 ## Configuration
 
-There is no static key and no server secret. Who may use the app is the `owners` collection. There is no deploy key either: GitHub Actions deploys through Workload Identity Federation (`docs/deploy-setup.md`).
+There is no static key and no server secret. Who may use the app is the `owners` collection. There is no deploy key either: deploys run by hand from the operator's PC, signed in with the Firebase CLI.
