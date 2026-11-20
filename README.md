@@ -80,14 +80,13 @@ Nothing in these steps is ever typed into a chat or committed.
 4. **Project settings (gear) → General → Your apps → Web (`</>`)**: register a web app (any nickname). Tick **Also set up Firebase Hosting**. Skip the SDK snippet; the app loads its config from Hosting by itself.
 5. Note the **Project ID** shown in Project settings.
 
-### 2. Give GitHub permission to deploy
+### 2. Give GitHub permission to deploy (keyless)
 
-1. Open https://console.cloud.google.com/iam-admin/serviceaccounts and pick the same project.
-2. **Create service account**, name `github-deploy`. Grant it the roles **Firebase Admin** and **Service Usage Consumer**. Done.
-3. Open the new account → **Keys → Add key → Create new key → JSON**. A file downloads.
-4. In GitHub: **this repository → Settings → Secrets and variables → Actions**:
-   - **Secrets → New repository secret**: name `FIREBASE_SERVICE_ACCOUNT`, value: the whole content of the downloaded JSON file. Then delete the file from your computer.
-   - **Variables → New repository variable**: name `FIREBASE_PROJECT_ID`, value: your project ID.
+Follow **`docs/deploy-setup.md`**: paste one script into Google Cloud Shell
+(free), then add the three repository **variables** it prints under GitHub →
+Settings → Secrets and variables → Actions → Variables. No key is created or
+stored anywhere; Google trusts only this repository's `main` branch, and each
+deploy's credential expires within the hour.
 
 ### 3. Deploy
 
@@ -103,7 +102,7 @@ Any other Google account that signs in only ever sees *Access denied*.
 
 ## Operating it
 
-- **Revoke GitHub's deploy access:** delete the key (or the whole `github-deploy` service account) in Google Cloud, and the `FIREBASE_SERVICE_ACCOUNT` secret in GitHub.
+- **Revoke GitHub's deploy access:** disable the `github` pool under IAM & Admin → Workload Identity Federation, or delete the `github-deploy` service account (see `docs/deploy-setup.md`).
 - **Add or remove a device:** nothing to do; sign in with the same Google account anywhere. To stop someone, remove their document from `owners` (only yours should be there).
 - **Moving the database region** is not possible; create a new project instead.
 
